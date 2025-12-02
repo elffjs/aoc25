@@ -11,10 +11,10 @@ fn day1_part1(input: &str) -> i32 {
         match direction {
             'R' => position += clicks,
             'L' => position -= clicks,
-            _ => panic!(),
+            _ => panic!("Unexpected direction {}", direction),
         }
 
-        position = position.rem_euclid(100);
+        position = position % 100;
         if position == 0 {
             password += 1;
         }
@@ -34,12 +34,12 @@ fn day1_part2(input: &str) -> i32 {
         let step = match direction {
             'R' => 1,
             'L' => -1,
-            _ => panic!(),
+            _ => panic!("Unexpected direction {}", direction),
         };
 
         for _ in 0..clicks {
             position += step;
-            position = position.rem_euclid(100);
+            position = position % 100;
             if position == 0 {
                 password += 1;
             }
