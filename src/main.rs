@@ -1,17 +1,17 @@
 use std::fs;
 
-fn day1_part1(input: &str) -> i64 {
+fn day1_part1(input: &str) -> i32 {
     let mut password = 0;
-    let mut position = 50;
+    let mut position: i32 = 50;
 
     for line in input.lines() {
-        let direction = &line[0..1];
+        let direction = line.chars().next().unwrap();
         let clicks: i32 = line[1..].parse().unwrap();
 
-        if direction == "R" {
-            position += clicks;
-        } else if direction == "L" {
-            position -= clicks;
+        match direction {
+            'R' => position += clicks,
+            'L' => position -= clicks,
+            _ => panic!(),
         }
 
         position = position.rem_euclid(100);
@@ -20,37 +20,33 @@ fn day1_part1(input: &str) -> i64 {
         }
     }
 
-    return password;
+    password
 }
 
-fn day1_part2(input: &str) -> i64 {
+fn day1_part2(input: &str) -> i32 {
     let mut password = 0;
     let mut position: i32 = 50;
 
     for line in input.lines() {
-        let direction = &line[0..1];
+        let direction = line.chars().next().unwrap();
         let clicks: i32 = line[1..].parse().unwrap();
 
-        if direction == "R" {
-            for _ in 0..clicks {
-                position += 1;
-                position = position.rem_euclid(100);
-                if position == 0 {
-                    password += 1;
-                }
-            }
-        } else if direction == "L" {
-            for _ in 0..clicks {
-                position -= 1;
-                position = position.rem_euclid(100);
-                if position == 0 {
-                    password += 1;
-                }
+        let step = match direction {
+            'R' => 1,
+            'L' => -1,
+            _ => panic!(),
+        };
+
+        for _ in 0..clicks {
+            position += step;
+            position = position.rem_euclid(100);
+            if position == 0 {
+                password += 1;
             }
         }
     }
 
-    return password;
+    password
 }
 
 fn day2_part1(input: &str) -> i64 {
@@ -58,26 +54,30 @@ fn day2_part1(input: &str) -> i64 {
 
     // Get rid of the trailing newline.
     for range in input.trim().split(",") {
-        let v: Vec<i64> = range.split("-").map(|x| x.parse().unwrap()).collect();
-        let low = v[0];
-        let hi = v[1];
+        let [low, hi] = range
+            .split("-")
+            .map(|e| e.parse::<i64>().unwrap())
+            .collect::<Vec<_>>()
+            .try_into()
+            .unwrap();
 
         for num in low..=hi {
             let s = num.to_string();
-            let l: usize = s.len();
+            let len: usize = s.len();
 
-            if l % 2 != 0 {
+            if len % 2 != 0 {
                 continue;
             }
 
-            let block_len = l / 2;
+            let block_len = len / 2;
 
-            if &s[..block_len] == &s[block_len..] {
+            if s[..block_len] == s[block_len..] {
                 invalid += num;
             }
         }
     }
-    return invalid;
+
+    invalid
 }
 
 fn day2_part2(input: &str) -> i64 {
@@ -85,25 +85,27 @@ fn day2_part2(input: &str) -> i64 {
 
     // Get rid of the trailing newline.
     for range in input.trim().split(",") {
-        let v: Vec<i64> = range.split("-").map(|x| x.parse().unwrap()).collect();
-        let low = v[0];
-        let hi = v[1];
+        let [low, hi] = range
+            .split("-")
+            .map(|e| e.parse::<i64>().unwrap())
+            .collect::<Vec<_>>()
+            .try_into()
+            .unwrap();
 
         for num in low..=hi {
             let s = num.to_string();
-            let l: usize = s.len();
+            let len: usize = s.len();
 
             // Can't be more than half the size of the whole string.
-            let biggest_block = l / 2;
+            let biggest_block = len / 2;
 
             'block_size_loop: for block_len in 1..=biggest_block {
-                if l % block_len != 0 {
+                if len % block_len != 0 {
                     continue;
                 }
 
-                let block_ct = l / block_len;
-
-                let first = &s[0..block_len];
+                let block_ct = len / block_len;
+                let first = &s[..block_len];
 
                 for block_num in 1..block_ct {
                     let this = &s[block_num * block_len..(block_num + 1) * block_len];
@@ -117,7 +119,8 @@ fn day2_part2(input: &str) -> i64 {
             }
         }
     }
-    return invalid;
+
+    invalid
 }
 
 fn main() {
