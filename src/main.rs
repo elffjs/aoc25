@@ -128,7 +128,7 @@ fn day3_part1(input: &str) -> i64 {
 
     for line in input.lines() {
         let digits: Vec<_> = line.chars().map(|c| c.to_digit(10).unwrap()).collect();
-        let line_len: usize = digits.len();
+        let line_len = digits.len();
         let mut max = 0;
 
         // This is super wasteful. We should use the logic from part 2 with
@@ -153,7 +153,7 @@ fn day3_part2(input: &str) -> i64 {
 
     for line in input.lines() {
         let digits: Vec<_> = line.chars().map(|c| c.to_digit(10).unwrap()).collect();
-        let line_len: usize = digits.len();
+        let line_len = digits.len();
 
         let mut digit_idxs: [usize; 12] = [0; 12];
         for digit_index in 0..12 {
