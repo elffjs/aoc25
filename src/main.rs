@@ -124,23 +124,25 @@ fn day2_part2(input: &str) -> i64 {
 }
 
 fn day3_part1(input: &str) -> i64 {
-    let mut joltage: i64 = 0;
+    let mut joltage = 0;
 
     for line in input.lines() {
-        let mut max: i64 = -1;
+        let digits: Vec<_> = line.chars().map(|c| c.to_digit(10).unwrap()).collect();
+        let line_len: usize = digits.len();
+        let mut max = 0;
 
-        for i in 0..line.len() - 1 {
-            for j in i + 1..line.len() {
-                let together = format!("{}{}", &line[i..i + 1], &line[j..j + 1]);
-                let val: i64 = together.parse().unwrap();
+        // This is super wasteful. We should use the logic from part 2 with
+        // 2 in place of 12.
+        for i in 0..line_len - 1 {
+            let tens = 10 * digits[i];
+            for j in i + 1..line_len {
+                let val = tens + digits[j];
 
-                if val > max {
-                    max = val;
-                }
+                max = max.max(val);
             }
         }
 
-        joltage += max;
+        joltage += max as i64;
     }
 
     joltage
@@ -150,6 +152,9 @@ fn day3_part2(input: &str) -> i64 {
     let mut joltage: i64 = 0;
 
     for line in input.lines() {
+        let digits: Vec<_> = line.chars().map(|c| c.to_digit(10).unwrap()).collect();
+        let line_len: usize = digits.len();
+
         let mut digit_idxs: [usize; 12] = [0; 12];
         for digit_index in 0..12 {
             let start = if digit_index == 0 {
@@ -157,12 +162,12 @@ fn day3_part2(input: &str) -> i64 {
             } else {
                 digit_idxs[digit_index - 1] + 1
             };
-            let stop = line.len() - 11 + digit_index;
+            let stop = line_len - 11 + digit_index;
 
             let mut max_ind = start;
             for i in start + 1..stop {
-                let max_val = line[max_ind..max_ind + 1].parse::<i64>().unwrap();
-                let val = line[i..i + 1].parse::<i64>().unwrap();
+                let max_val = digits[max_ind];
+                let val = digits[i];
 
                 if val > max_val {
                     max_ind = i;
@@ -172,16 +177,11 @@ fn day3_part2(input: &str) -> i64 {
             digit_idxs[digit_index] = max_ind;
         }
 
-        let mut out: String = String::new();
-        for digit_index in 0..12 {
-            out = format!(
-                "{}{}",
-                out,
-                &line[digit_idxs[digit_index]..digit_idxs[digit_index] + 1]
-            );
-        }
+        let line_joltage = digit_idxs
+            .iter()
+            .fold(0, |acc, &idx| 10 * acc + digits[idx] as i64);
 
-        joltage += out.parse::<i64>().unwrap();
+        joltage += line_joltage;
     }
 
     joltage
