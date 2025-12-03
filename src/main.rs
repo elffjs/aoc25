@@ -236,6 +236,5 @@ L82";
 818181911112111";
         assert_eq!(357, day3_part1(input));
         assert_eq!(3121910778619, day3_part2(input));
-        // assert_eq!(4174379265, day2_part2(input));
     }
 }
