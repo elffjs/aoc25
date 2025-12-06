@@ -349,7 +349,7 @@ fn day5_part1(input: &str) -> i64 {
     let mut ranges: Vec<(i64, i64)> = Vec::new();
     let mut available = 0;
 
-    'lineloop: for line in input.lines() {
+    for line in input.lines() {
         if getting_ranges && line.is_empty() {
             getting_ranges = false;
             continue;
@@ -366,15 +366,15 @@ fn day5_part1(input: &str) -> i64 {
             ranges.push((low, hi));
         } else {
             let candidate: i64 = line.parse().unwrap();
-
-            for (lo, hi) in &ranges {
-                if *lo <= candidate && candidate <= *hi {
-                    available += 1;
-                    continue 'lineloop;
-                }
+            if ranges
+                .iter()
+                .any(|&(lo, hi)| lo <= candidate && candidate <= hi)
+            {
+                available += 1;
             }
         }
     }
+
     available
 }
 
@@ -402,10 +402,10 @@ fn day5_part2(input: &str) -> i64 {
 
     let mut active = ranges[0];
 
-    for r in &ranges[1..] {
+    for &r in &ranges[1..] {
         if r.0 > active.1 + 1 {
             merged.push(active);
-            active = *r;
+            active = r;
         } else if r.1 > active.1 {
             active = (active.0, r.1);
         }
