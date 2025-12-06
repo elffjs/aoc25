@@ -187,6 +187,235 @@ fn day3_part2(input: &str) -> i64 {
     joltage
 }
 
+fn day4_part1(input: &str) -> i64 {
+    let grid: Vec<Vec<char>> = input.lines().map(|l| l.chars().collect()).collect();
+
+    // println!("{:?}", grid);
+
+    let rows = grid.len();
+    let cols = grid[0].len();
+
+    let mut rolls = 0;
+
+    for i in 0..rows {
+        for j in 0..cols {
+            if grid[i][j] == '@' {
+                let mut neighbors = 0;
+
+                if i > 0 && j > 0 {
+                    if grid[i - 1][j - 1] == '@' {
+                        neighbors += 1;
+                    }
+                }
+
+                if i > 0 {
+                    if grid[i - 1][j] == '@' {
+                        neighbors += 1;
+                    }
+                }
+
+                if i > 0 && j < cols - 1 {
+                    if grid[i - 1][j + 1] == '@' {
+                        neighbors += 1;
+                    }
+                }
+
+                if j > 0 {
+                    if grid[i][j - 1] == '@' {
+                        neighbors += 1;
+                    }
+                }
+
+                if j < cols - 1 {
+                    if grid[i][j + 1] == '@' {
+                        neighbors += 1;
+                    }
+                }
+
+                if i < rows - 1 && j > 0 {
+                    if grid[i + 1][j - 1] == '@' {
+                        neighbors += 1;
+                    }
+                }
+
+                if i < rows - 1 {
+                    if grid[i + 1][j] == '@' {
+                        neighbors += 1;
+                    }
+                }
+
+                if i < rows - 1 && j < cols - 1 {
+                    if grid[i + 1][j + 1] == '@' {
+                        neighbors += 1;
+                    }
+                }
+
+                if neighbors < 4 {
+                    rolls += 1;
+                }
+            }
+        }
+    }
+    rolls
+}
+
+fn day4_part2(input: &str) -> i64 {
+    let mut grid: Vec<Vec<char>> = input.lines().map(|l| l.chars().collect()).collect();
+
+    let rows = grid.len();
+    let cols = grid[0].len();
+
+    let mut rolls: i64 = 0;
+
+    loop {
+        let mut marked: Vec<(usize, usize)> = Vec::new();
+
+        for i in 0..rows {
+            for j in 0..cols {
+                if grid[i][j] == '@' {
+                    let mut neighbors = 0;
+
+                    if i > 0 && j > 0 {
+                        if grid[i - 1][j - 1] == '@' {
+                            neighbors += 1;
+                        }
+                    }
+
+                    if i > 0 {
+                        if grid[i - 1][j] == '@' {
+                            neighbors += 1;
+                        }
+                    }
+
+                    if i > 0 && j < cols - 1 {
+                        if grid[i - 1][j + 1] == '@' {
+                            neighbors += 1;
+                        }
+                    }
+
+                    if j > 0 {
+                        if grid[i][j - 1] == '@' {
+                            neighbors += 1;
+                        }
+                    }
+
+                    if j < cols - 1 {
+                        if grid[i][j + 1] == '@' {
+                            neighbors += 1;
+                        }
+                    }
+
+                    if i < rows - 1 && j > 0 {
+                        if grid[i + 1][j - 1] == '@' {
+                            neighbors += 1;
+                        }
+                    }
+
+                    if i < rows - 1 {
+                        if grid[i + 1][j] == '@' {
+                            neighbors += 1;
+                        }
+                    }
+
+                    if i < rows - 1 && j < cols - 1 {
+                        if grid[i + 1][j + 1] == '@' {
+                            neighbors += 1;
+                        }
+                    }
+
+                    if neighbors < 4 {
+                        marked.push((i, j));
+                    }
+                }
+            }
+        }
+
+        if marked.is_empty() {
+            break;
+        }
+
+        for (i, j) in &marked {
+            grid[*i][*j] = '.';
+        }
+
+        rolls += marked.len() as i64;
+    }
+    rolls
+}
+
+fn day5_part1(input: &str) -> i64 {
+    let mut getting_ranges = true;
+
+    let mut ranges: Vec<(i64, i64)> = Vec::new();
+    let mut available = 0;
+
+    'lineloop: for line in input.lines() {
+        if getting_ranges && line.is_empty() {
+            getting_ranges = false;
+            continue;
+        }
+
+        if getting_ranges {
+            let [low, hi] = line
+                .split("-")
+                .map(|e| e.parse::<i64>().unwrap())
+                .collect::<Vec<_>>()
+                .try_into()
+                .unwrap();
+
+            ranges.push((low, hi));
+        } else {
+            let candidate: i64 = line.parse().unwrap();
+
+            for (lo, hi) in &ranges {
+                if *lo <= candidate && candidate <= *hi {
+                    available += 1;
+                    continue 'lineloop;
+                }
+            }
+        }
+    }
+    available
+}
+
+fn day5_part2(input: &str) -> i64 {
+    let mut ranges: Vec<(i64, i64)> = Vec::new();
+
+    for line in input.lines() {
+        if line.is_empty() {
+            break;
+        }
+
+        let [low, hi] = line
+            .split("-")
+            .map(|e| e.parse::<i64>().unwrap())
+            .collect::<Vec<_>>()
+            .try_into()
+            .unwrap();
+
+        ranges.push((low, hi));
+    }
+
+    ranges.sort();
+
+    let mut merged: Vec<(i64, i64)> = Vec::new();
+
+    let mut active = ranges[0];
+
+    for r in &ranges[1..] {
+        if r.0 > active.1 + 1 {
+            merged.push(active);
+            active = *r;
+        } else if r.1 > active.1 {
+            active = (active.0, r.1);
+        }
+    }
+
+    merged.push(active);
+
+    merged.iter().map(|r| r.1 - r.0 + 1).sum()
+}
+
 fn main() {
     let day1_input = fs::read_to_string("input1").unwrap();
     println!("D1P1: {}", day1_part1(&day1_input));
@@ -199,6 +428,14 @@ fn main() {
     let day3_input = fs::read_to_string("input3").unwrap();
     println!("D3P1: {}", day3_part1(&day3_input));
     println!("D3P2: {}", day3_part2(&day3_input));
+
+    let day4_input = fs::read_to_string("input4").unwrap();
+    println!("D4P1: {}", day4_part1(&day4_input));
+    println!("D4P2: {}", day4_part2(&day4_input));
+
+    let day5_input = fs::read_to_string("input5").unwrap();
+    println!("D5P1: {}", day5_part1(&day5_input));
+    println!("D5P2: {}", day5_part2(&day5_input));
 }
 
 #[cfg(test)]
@@ -236,5 +473,38 @@ L82";
 818181911112111";
         assert_eq!(357, day3_part1(input));
         assert_eq!(3121910778619, day3_part2(input));
+    }
+
+    #[test]
+    fn test_day4() {
+        let input = "..@@.@@@@.
+@@@.@.@.@@
+@@@@@.@.@@
+@.@@@@..@.
+@@.@@@@.@@
+.@@@@@@@.@
+.@.@.@.@@@
+@.@@@.@@@@
+.@@@@@@@@.
+@.@.@@@.@.";
+        assert_eq!(13, day4_part1(input));
+        assert_eq!(43, day4_part2(input));
+    }
+
+    #[test]
+    fn test_day5() {
+        let input = "3-5
+10-14
+16-20
+12-18
+
+1
+5
+8
+11
+17
+32";
+        assert_eq!(3, day5_part1(input));
+        assert_eq!(14, day5_part2(input));
     }
 }
