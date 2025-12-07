@@ -416,6 +416,116 @@ fn day5_part2(input: &str) -> i64 {
     merged.iter().map(|r| r.1 - r.0 + 1).sum()
 }
 
+fn day6_part1(input: &str) -> i64 {
+    let lines: Vec<&str> = input.lines().collect();
+
+    let nums: Vec<Vec<i64>> = lines[..lines.len() - 1]
+        .iter()
+        .map(|l| l.split_whitespace().map(|s| s.parse().unwrap()).collect())
+        .collect();
+
+    let ops: Vec<&str> = lines[lines.len() - 1].split_whitespace().collect();
+
+    let mut tot = 0;
+
+    for i in 0..ops.len() {
+        match ops[i] {
+            "+" => {
+                let mut col_acc = nums[0][i];
+                for row in 1..lines.len() - 1 {
+                    col_acc += nums[row][i];
+                }
+                tot += col_acc;
+            }
+            "*" => {
+                let mut col_acc = nums[0][i];
+                for row in 1..lines.len() - 1 {
+                    col_acc *= nums[row][i];
+                }
+                tot += col_acc;
+            }
+            _ => panic!("xdd"),
+        }
+    }
+
+    tot
+}
+
+fn day6_part2(input: &str) -> i64 {
+    // let lines: Vec<&str> = input.lines().collect();
+
+    // // let nums: Vec<Vec<i64>> = lines[..lines.len()-1].iter().map(|l| {
+    // //     l.split_whitespace().map(|s| s.parse().unwrap()).collect()
+    // // }).collect();
+
+    // let grid
+
+    // let op_locs: Vec<usize> = lines[lines.len()-1].chars().enumerate().filter_map(|(i, c)| {
+    //     match c {
+    //         ' ' => None,
+    //         c => Some(i),
+    //     }
+    // }).collect();
+
+    // println!("{:?}", op_locs);
+
+    // for loc_idx in 0..op_locs.len() {
+    //     let op = lines[lines.len()-1].chars().collect::<Vec<char>>()[op_locs[loc_idx]];
+
+    //     let start = op_locs[loc_idx];
+    //     let end = if loc_idx < op_locs.len() - 1 {
+    //         op_locs[loc_idx+1]-1
+    //     } else {
+    //         lines[lines.len()-1].len()
+    //     };
+
+    //         match op {
+    //             "+" => {
+
+    //                         for col in start..end {
+    //         let mut col_val = 0;
+    //         let coeff = 1;
+
+    //         for row in 0..lines.len()-1 {
+    //             if lines
+    //         }
+
+    //     }
+    //             }
+    //             _ => panic!()
+    //         }
+
+    // }
+
+    // let mut tot = 0;
+
+    // for i in 0..ops.len() {
+    //     match ops[i] {
+    //         "+" => {
+    //                                     let mut col_acc = nums[0][i];
+    //     for row in 1..lines.len()-1 {
+    //         col_acc += nums[row][i];
+    //     }
+    //     tot += col_acc;
+    //         },
+    //         "*" => {
+
+    //                                     let mut col_acc = nums[0][i];
+    //     for row in 1..lines.len()-1 {
+    //         col_acc *= nums[row][i];
+
+    //     }
+    //             tot += col_acc;
+
+    //         },
+    //         _ => panic!("xdd"),
+    //     }
+
+    // }
+
+    0
+}
+
 fn main() {
     let day1_input = fs::read_to_string("input1").unwrap();
     println!("D1P1: {}", day1_part1(&day1_input));
@@ -436,6 +546,9 @@ fn main() {
     let day5_input = fs::read_to_string("input5").unwrap();
     println!("D5P1: {}", day5_part1(&day5_input));
     println!("D5P2: {}", day5_part2(&day5_input));
+
+    let day6_input = fs::read_to_string("input6").unwrap();
+    println!("D6P1: {}", day6_part1(&day6_input));
 }
 
 #[cfg(test)]
@@ -506,5 +619,15 @@ L82";
 32";
         assert_eq!(3, day5_part1(input));
         assert_eq!(14, day5_part2(input));
+    }
+
+    #[test]
+    fn test_day6() {
+        let input = "123 328  51 64 
+ 45 64  387 23 
+  6 98  215 314
+*   +   *   +  ";
+        assert_eq!(4277556, day6_part1(input));
+        assert_eq!(3263827, day6_part2(input));
     }
 }
