@@ -1,3 +1,4 @@
+use core::panic;
 use std::fs;
 
 fn day1_part1(input: &str) -> i32 {
@@ -452,78 +453,71 @@ fn day6_part1(input: &str) -> i64 {
 }
 
 fn day6_part2(input: &str) -> i64 {
-    // let lines: Vec<&str> = input.lines().collect();
+    let lines: Vec<&str> = input.lines().collect();
 
-    // // let nums: Vec<Vec<i64>> = lines[..lines.len()-1].iter().map(|l| {
-    // //     l.split_whitespace().map(|s| s.parse().unwrap()).collect()
-    // // }).collect();
+    let char_grid: Vec<Vec<char>> = lines[..lines.len() - 1]
+        .iter()
+        .map(|l| l.chars().collect())
+        .collect();
 
-    // let grid
+    let op_locs: Vec<usize> = lines[lines.len() - 1]
+        .chars()
+        .enumerate()
+        .filter_map(|(i, c)| match c {
+            ' ' => None,
+            _ => Some(i),
+        })
+        .collect();
 
-    // let op_locs: Vec<usize> = lines[lines.len()-1].chars().enumerate().filter_map(|(i, c)| {
-    //     match c {
-    //         ' ' => None,
-    //         c => Some(i),
-    //     }
-    // }).collect();
+    let mut overall = 0;
 
-    // println!("{:?}", op_locs);
+    for loc_idx in 0..op_locs.len() {
+        let op = lines[lines.len() - 1].chars().collect::<Vec<char>>()[op_locs[loc_idx]];
 
-    // for loc_idx in 0..op_locs.len() {
-    //     let op = lines[lines.len()-1].chars().collect::<Vec<char>>()[op_locs[loc_idx]];
+        let start = op_locs[loc_idx];
+        let end = if loc_idx < op_locs.len() - 1 {
+            op_locs[loc_idx + 1] - 1
+        } else {
+            lines[lines.len() - 1].len()
+        };
 
-    //     let start = op_locs[loc_idx];
-    //     let end = if loc_idx < op_locs.len() - 1 {
-    //         op_locs[loc_idx+1]-1
-    //     } else {
-    //         lines[lines.len()-1].len()
-    //     };
+        match op {
+            '+' => {
+                let mut tot = 0;
+                for col in start..end {
+                    let mut tot_num: i64 = 0;
+                    // let mut coeff = 1;
+                    for row in 0..lines.len() - 1 {
+                        let c = char_grid[row][col];
+                        if c != ' ' {
+                            tot_num = 10 * tot_num + c.to_digit(10).unwrap() as i64;
+                        }
+                        // print!("{}", char_grid[row][col])
+                    }
 
-    //         match op {
-    //             "+" => {
-
-    //                         for col in start..end {
-    //         let mut col_val = 0;
-    //         let coeff = 1;
-
-    //         for row in 0..lines.len()-1 {
-    //             if lines
-    //         }
-
-    //     }
-    //             }
-    //             _ => panic!()
-    //         }
-
-    // }
-
-    // let mut tot = 0;
-
-    // for i in 0..ops.len() {
-    //     match ops[i] {
-    //         "+" => {
-    //                                     let mut col_acc = nums[0][i];
-    //     for row in 1..lines.len()-1 {
-    //         col_acc += nums[row][i];
-    //     }
-    //     tot += col_acc;
-    //         },
-    //         "*" => {
-
-    //                                     let mut col_acc = nums[0][i];
-    //     for row in 1..lines.len()-1 {
-    //         col_acc *= nums[row][i];
-
-    //     }
-    //             tot += col_acc;
-
-    //         },
-    //         _ => panic!("xdd"),
-    //     }
-
-    // }
-
-    0
+                    tot += tot_num;
+                }
+                overall += tot;
+            }
+            '*' => {
+                let mut tot = 1;
+                for col in start..end {
+                    let mut tot_num: i64 = 0;
+                    // let mut coeff = 1;
+                    for row in 0..lines.len() - 1 {
+                        let c = char_grid[row][col];
+                        if c != ' ' {
+                            tot_num = 10 * tot_num + c.to_digit(10).unwrap() as i64;
+                        }
+                    }
+                    tot *= tot_num;
+                }
+                overall += tot;
+            }
+            _ => panic!(),
+        }
+    }
+    overall
 }
 
 fn main() {
@@ -549,6 +543,7 @@ fn main() {
 
     let day6_input = fs::read_to_string("input6").unwrap();
     println!("D6P1: {}", day6_part1(&day6_input));
+    println!("D6P2: {}", day6_part2(&day6_input));
 }
 
 #[cfg(test)]
