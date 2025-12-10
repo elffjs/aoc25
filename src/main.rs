@@ -520,6 +520,66 @@ fn day6_part2(input: &str) -> i64 {
     overall
 }
 
+fn day7_part1(input: &str) -> i64 {
+    let mut lines: Vec<Vec<char>> = input.lines().map(|l| l.chars().collect()).collect();
+
+    for col in 0..lines[0].len() {
+        if lines[0][col] == 'S' {
+            lines[1][col] = '|';
+            break;
+        }
+    }
+
+    let mut splits = 0;
+
+    for row in 0..lines.len() - 1 {
+        for col in 0..lines[row].len() {
+            if lines[row][col] == 'S' || lines[row][col] == '|' {
+                if lines[row + 1][col] == '.' {
+                    lines[row + 1][col] = '|';
+                } else if lines[row + 1][col] == '^' {
+                    lines[row + 1][col - 1] = '|';
+                    lines[row + 1][col + 1] = '|';
+                    splits += 1;
+                }
+            }
+        }
+    }
+
+    splits
+}
+
+fn day7_part2(input: &str) -> i64 {
+    let mut lines: Vec<Vec<i64>> = input
+        .lines()
+        .map(|l| {
+            l.chars()
+                .map(|c| match c {
+                    'S' => 1,
+                    '.' => 0,
+                    '^' => -1,
+                    _ => panic!(),
+                })
+                .collect()
+        })
+        .collect();
+
+    for row in 0..lines.len() - 1 {
+        for col in 0..lines[row].len() {
+            if lines[row][col] > 0 {
+                if lines[row + 1][col] >= 0 {
+                    lines[row + 1][col] += lines[row][col];
+                } else {
+                    lines[row + 1][col - 1] += lines[row][col];
+                    lines[row + 1][col + 1] += lines[row][col];
+                }
+            }
+        }
+    }
+
+    lines.last().unwrap().iter().sum()
+}
+
 fn main() {
     let day1_input = fs::read_to_string("input1").unwrap();
     println!("D1P1: {}", day1_part1(&day1_input));
@@ -544,6 +604,10 @@ fn main() {
     let day6_input = fs::read_to_string("input6").unwrap();
     println!("D6P1: {}", day6_part1(&day6_input));
     println!("D6P2: {}", day6_part2(&day6_input));
+
+    let day7_input = fs::read_to_string("input7").unwrap();
+    println!("D7P1: {}", day7_part1(&day7_input));
+    println!("D7P2: {}", day7_part2(&day7_input));
 }
 
 #[cfg(test)]
@@ -624,5 +688,27 @@ L82";
 *   +   *   +  ";
         assert_eq!(4277556, day6_part1(input));
         assert_eq!(3263827, day6_part2(input));
+    }
+
+    #[test]
+    fn test_day7() {
+        let input = ".......S.......
+...............
+.......^.......
+...............
+......^.^......
+...............
+.....^.^.^.....
+...............
+....^.^...^....
+...............
+...^.^...^.^...
+...............
+..^...^.....^..
+...............
+.^.^.^.^.^...^.
+...............";
+        assert_eq!(21, day7_part1(input));
+        assert_eq!(40, day7_part2(input));
     }
 }
