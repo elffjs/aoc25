@@ -580,34 +580,331 @@ fn day7_part2(input: &str) -> i64 {
     lines.last().unwrap().iter().sum()
 }
 
+fn dist(a: [f64; 3], b: [f64; 3]) -> f64 {
+    ((b[0] - a[0]).powi(2) + (b[1] - a[1]).powi(2) + (b[2] - a[2]).powi(2)).sqrt()
+}
+
+fn day8_part1(input: &str, connections: usize) -> i64 {
+    let coords: Vec<[f64; 3]> = input
+        .lines()
+        .map(|l| {
+            l.split(",")
+                .map(|n| n.parse::<f64>().unwrap())
+                .collect::<Vec<_>>()
+                .try_into()
+                .unwrap()
+        })
+        .collect();
+
+    let mut adj = vec![vec![false; coords.len()]; coords.len()];
+
+    for _ in 0..connections {
+        let mut lo: Option<(usize, usize)> = None;
+
+        for i in 0..coords.len() {
+            for j in i + 1..coords.len() {
+                // println!("From {} to {}", i, j);
+
+                if adj[i][j] {
+                    continue;
+                }
+                match lo {
+                    None => {
+                        lo = Some((i, j));
+                    }
+                    Some((a, b)) => {
+                        if dist(coords[i], coords[j]) < dist(coords[a], coords[b]) {
+                            lo = Some((i, j));
+                        }
+                    }
+                }
+            }
+        }
+
+        adj[lo.unwrap().0][lo.unwrap().1] = true;
+        adj[lo.unwrap().1][lo.unwrap().0] = true; // Don't need this really.
+    }
+
+    let mut visited = vec![false; coords.len()];
+
+    let mut components: Vec<Vec<usize>> = Vec::new();
+
+    for i in 0..coords.len() {
+        if visited[i] {
+            continue;
+        }
+
+        let mut comp = Vec::new();
+
+        dfs_sub(&adj, &mut visited, i, &mut comp);
+
+        components.push(comp);
+    }
+
+    components.sort_by_key(|comp| comp.len());
+    components.reverse();
+
+    let mut prod = 1;
+
+    for pl in 0..3 {
+        prod *= components[pl].len();
+    }
+
+    prod as i64
+}
+
+fn day8_part2(input: &str) -> i64 {
+    let coords: Vec<[f64; 3]> = input
+        .lines()
+        .map(|l| {
+            l.split(",")
+                .map(|n| n.parse::<f64>().unwrap())
+                .collect::<Vec<_>>()
+                .try_into()
+                .unwrap()
+        })
+        .collect();
+
+    let mut adj = vec![vec![false; coords.len()]; coords.len()];
+
+    loop {
+        let mut lo: Option<(usize, usize)> = None;
+
+        for i in 0..coords.len() {
+            for j in i + 1..coords.len() {
+                // println!("From {} to {}", i, j);
+
+                if adj[i][j] {
+                    continue;
+                }
+                match lo {
+                    None => {
+                        lo = Some((i, j));
+                    }
+                    Some((a, b)) => {
+                        if dist(coords[i], coords[j]) < dist(coords[a], coords[b]) {
+                            lo = Some((i, j));
+                        }
+                    }
+                }
+            }
+        }
+
+        adj[lo.unwrap().0][lo.unwrap().1] = true;
+        adj[lo.unwrap().1][lo.unwrap().0] = true; // Don't need this really.
+
+        let mut visited = vec![false; coords.len()];
+
+        let mut comp = Vec::new();
+
+        dfs_sub(&adj, &mut visited, 0, &mut comp);
+
+        if comp.len() == coords.len() {
+            return coords[lo.unwrap().0][0] as i64 * coords[lo.unwrap().1][0] as i64;
+        }
+    }
+}
+
+fn dfs_sub(adj: &Vec<Vec<bool>>, visited: &mut Vec<bool>, start: usize, comp: &mut Vec<usize>) {
+    visited[start] = true;
+    comp.push(start);
+
+    for targ in 0..adj.len() {
+        if adj[start][targ] && !visited[targ] {
+            dfs_sub(adj, visited, targ, comp);
+        }
+    }
+}
+
+fn day9_part1(input: &str) -> i64 {
+    let coords: Vec<[i64; 2]> = input
+        .lines()
+        .map(|l| {
+            l.split(",")
+                .map(|n| n.parse::<i64>().unwrap())
+                .collect::<Vec<_>>()
+                .try_into()
+                .unwrap()
+        })
+        .collect();
+
+    let mut max = -1;
+
+    for i in 0..coords.len() {
+        for j in i + 1..coords.len() {
+            max = max.max(
+                (coords[i][0] - coords[j][0] + 1).abs() * (coords[i][1] - coords[j][1] + 1).abs(),
+            )
+        }
+    }
+
+    max
+}
+
+fn day9_part2(input: &str) -> i64 {
+    let coords: Vec<[usize; 2]> = input
+        .lines()
+        .map(|l| {
+            l.split(",")
+                .map(|n| n.parse::<usize>().unwrap())
+                .collect::<Vec<_>>()
+                .try_into()
+                .unwrap()
+        })
+        .collect();
+
+    let min_col = coords.iter().map(|p| p[0]).min().unwrap();
+    let min_row = coords.iter().map(|p| p[1]).min().unwrap();
+
+    let max_col = coords.iter().map(|p| p[0]).max().unwrap();
+    let max_row = coords.iter().map(|p| p[1]).max().unwrap();
+
+    let mut drawing = vec![vec!['.'; max_col as usize + 1]; max_row as usize + 1];
+
+    for c in coords.iter() {
+        drawing[c[1]][c[0]] = '#';
+    }
+
+    // for row in min_row..=max_row {
+    //     for col in min_col..=max_col {
+    //         print!("{}", drawing[row][col]);
+    //     }
+    //     println!();
+    // }
+
+    for i in 0..coords.len() {
+        let next_ind = if i < coords.len() - 1 { i + 1 } else { 0 };
+
+        let start = coords[i];
+        let end = coords[next_ind];
+
+        if start[0] == end[0] {
+            // Same col.
+            for row in start[1].min(end[1]) + 1..start[1].max(end[1]) {
+                drawing[row][start[0]] = 'X';
+            }
+        } else {
+            // Same row.
+            for col in start[0].min(end[0]) + 1..start[0].max(end[0]) {
+                drawing[start[1]][col] = 'X';
+            }
+        }
+    }
+
+    // println!();
+
+    // for row in min_row..=max_row {
+    //     for col in min_col..=max_col {
+    //         print!("{}", drawing[row][col]);
+    //     }
+    //     println!();
+    // }
+
+    let mut pt: Option<(usize, usize)> = None;
+
+    for j in 0..drawing[min_row].len() {
+        if drawing[min_row][j] == '#' {
+            pt = Some((min_row, j));
+            break;
+        }
+    }
+
+    let pt = pt.unwrap();
+
+    let mut stack: Vec<(usize, usize)> = vec![(pt.0 + 1, pt.1 + 1)];
+
+    while let Some(start) = stack.pop() {
+        drawing[start.0][start.1] = 'X';
+
+        // One row up.
+        if start.0 > 0 && drawing[start.0 - 1][start.1] == '.' {
+            stack.push((start.0 - 1, start.1));
+        }
+
+        // One row down.
+        if start.0 < drawing.len() - 1 && drawing[start.0 + 1][start.1] == '.' {
+            stack.push((start.0 + 1, start.1));
+        }
+
+        // One col left.
+        if start.1 > 0 && drawing[start.0][start.1 - 1] == '.' {
+            stack.push((start.0, start.1 - 1));
+        }
+
+        // One col right.
+        if start.1 < drawing[0].len() - 1 && drawing[start.0][start.1 + 1] == '.' {
+            stack.push((start.0, start.1 + 1));
+        }
+    }
+
+    // println!();
+
+    // for row in min_row..=max_row {
+    //     for col in min_col..=max_col {
+    //         print!("{}", drawing[row][col]);
+    //     }
+    //     println!();
+    // }
+
+    let mut max = 0;
+
+    for i in 0..coords.len() {
+        'xdd: for j in i + 1..coords.len() {
+            let l = coords[i][0].max(coords[j][0]) - coords[i][0].min(coords[j][0]) + 1;
+            let w = coords[i][1].max(coords[j][1]) - coords[i][1].min(coords[j][1]) + 1;
+
+            for row in coords[i][1].min(coords[j][1])..=coords[i][1].max(coords[j][1]) {
+                for col in coords[i][0].min(coords[j][0])..=coords[i][0].max(coords[j][0]) {
+                    if drawing[row][col] == '.' {
+                        continue 'xdd;
+                    }
+                }
+            }
+
+            max = max.max(l * w)
+        }
+    }
+
+    max as i64
+}
+
 fn main() {
-    let day1_input = fs::read_to_string("input1").unwrap();
-    println!("D1P1: {}", day1_part1(&day1_input));
-    println!("D1P2: {}", day1_part2(&day1_input));
+    // let day1_input = fs::read_to_string("input1").unwrap();
+    // println!("D1P1: {}", day1_part1(&day1_input));
+    // println!("D1P2: {}", day1_part2(&day1_input));
 
-    let day2_input = fs::read_to_string("input2").unwrap();
-    println!("D2P1: {}", day2_part1(&day2_input));
-    println!("D2P2: {}", day2_part2(&day2_input));
+    // let day2_input = fs::read_to_string("input2").unwrap();
+    // println!("D2P1: {}", day2_part1(&day2_input));
+    // println!("D2P2: {}", day2_part2(&day2_input));
 
-    let day3_input = fs::read_to_string("input3").unwrap();
-    println!("D3P1: {}", day3_part1(&day3_input));
-    println!("D3P2: {}", day3_part2(&day3_input));
+    // let day3_input = fs::read_to_string("input3").unwrap();
+    // println!("D3P1: {}", day3_part1(&day3_input));
+    // println!("D3P2: {}", day3_part2(&day3_input));
 
-    let day4_input = fs::read_to_string("input4").unwrap();
-    println!("D4P1: {}", day4_part1(&day4_input));
-    println!("D4P2: {}", day4_part2(&day4_input));
+    // let day4_input = fs::read_to_string("input4").unwrap();
+    // println!("D4P1: {}", day4_part1(&day4_input));
+    // println!("D4P2: {}", day4_part2(&day4_input));
 
-    let day5_input = fs::read_to_string("input5").unwrap();
-    println!("D5P1: {}", day5_part1(&day5_input));
-    println!("D5P2: {}", day5_part2(&day5_input));
+    // let day5_input = fs::read_to_string("input5").unwrap();
+    // println!("D5P1: {}", day5_part1(&day5_input));
+    // println!("D5P2: {}", day5_part2(&day5_input));
 
-    let day6_input = fs::read_to_string("input6").unwrap();
-    println!("D6P1: {}", day6_part1(&day6_input));
-    println!("D6P2: {}", day6_part2(&day6_input));
+    // let day6_input = fs::read_to_string("input6").unwrap();
+    // println!("D6P1: {}", day6_part1(&day6_input));
+    // println!("D6P2: {}", day6_part2(&day6_input));
 
-    let day7_input = fs::read_to_string("input7").unwrap();
-    println!("D7P1: {}", day7_part1(&day7_input));
-    println!("D7P2: {}", day7_part2(&day7_input));
+    // let day7_input = fs::read_to_string("input7").unwrap();
+    // println!("D7P1: {}", day7_part1(&day7_input));
+    // println!("D7P2: {}", day7_part2(&day7_input));
+
+    // let day8_input = fs::read_to_string("input8").unwrap();
+    // // println!("D8P1: {}", day8_part1(&day8_input, 1000));
+    // println!("D8P2: {}", day8_part2(&day8_input));
+
+    let day9_input = fs::read_to_string("input9").unwrap();
+    // println!("D8P1: {}", day8_part1(&day8_input, 1000));
+    println!("D9P1: {}", day9_part1(&day9_input));
+    println!("D9P2: {}", day9_part2(&day9_input));
 }
 
 #[cfg(test)]
@@ -710,5 +1007,45 @@ L82";
 ...............";
         assert_eq!(21, day7_part1(input));
         assert_eq!(40, day7_part2(input));
+    }
+
+    #[test]
+    fn test_day8() {
+        let input = "162,817,812
+57,618,57
+906,360,560
+592,479,940
+352,342,300
+466,668,158
+542,29,236
+431,825,988
+739,650,466
+52,470,668
+216,146,977
+819,987,18
+117,168,530
+805,96,715
+346,949,466
+970,615,88
+941,993,340
+862,61,35
+984,92,344
+425,690,689";
+        assert_eq!(40, day8_part1(input, 10));
+        assert_eq!(25272, day8_part2(input));
+    }
+
+    #[test]
+    fn test_day9() {
+        let input = "7,1
+11,1
+11,7
+9,7
+9,5
+2,5
+2,3
+7,3";
+        assert_eq!(50, day9_part1(input));
+        assert_eq!(24, day9_part2(input));
     }
 }
