@@ -1,5 +1,5 @@
 use core::panic;
-use std::fs;
+use std::{collections::HashMap, fs};
 
 fn day1_part1(input: &str) -> i32 {
     let mut password = 0;
@@ -741,127 +741,149 @@ fn day9_part1(input: &str) -> i64 {
     max
 }
 
+#[derive(Debug)]
+struct MatrixPos{
+    row: usize,
+    col: usize
+}
+
 fn day9_part2(input: &str) -> i64 {
-    let coords: Vec<[usize; 2]> = input
+    let coords: Vec<MatrixPos> = input
         .lines()
         .map(|l| {
-            l.split(",")
+            let v = l.split(",")
                 .map(|n| n.parse::<usize>().unwrap())
-                .collect::<Vec<_>>()
-                .try_into()
-                .unwrap()
+                .collect::<Vec<_>>();
+                MatrixPos{row: v[1], col: v[0]}
         })
         .collect();
 
-    let min_col = coords.iter().map(|p| p[0]).min().unwrap();
-    let min_row = coords.iter().map(|p| p[1]).min().unwrap();
+    let mut rows: Vec<usize> = coords.iter().map(|c| c.row).collect();
+    rows.sort();
+    rows.dedup();
 
-    let max_col = coords.iter().map(|p| p[0]).max().unwrap();
-    let max_row = coords.iter().map(|p| p[1]).max().unwrap();
+    let mut row_orig_to_comp: HashMap<usize, usize> = HashMap::new();
+    let mut row_comp_to_orig: HashMap<usize, usize> = HashMap::new();
 
-    let mut drawing = vec![vec!['.'; max_col as usize + 1]; max_row as usize + 1];
+    let mut comp_row = 0;
 
-    for c in coords.iter() {
-        drawing[c[1]][c[0]] = '#';
+    row_orig_to_comp.insert(rows[0], 0);
+    row_comp_to_orig.insert(0, rows[0]);
+
+    for i in 1..rows.len() {
+        // Don't create gaps.
+        if rows[i] == rows[i-1] + 1 {
+            comp_row += 1;
+        } else {
+            comp_row += 2;
+        }
+        row_orig_to_comp.insert(rows[i], comp_row);
+        row_comp_to_orig.insert(comp_row, rows[i]);
     }
 
-    // for row in min_row..=max_row {
-    //     for col in min_col..=max_col {
-    //         print!("{}", drawing[row][col]);
-    //     }
-    //     println!();
-    // }
+    let mut cols: Vec<usize> = coords.iter().map(|c| c.col).collect();
+    cols.sort();
+    cols.dedup();
 
-    for i in 0..coords.len() {
-        let next_ind = if i < coords.len() - 1 { i + 1 } else { 0 };
+    let mut col_orig_to_comp: HashMap<usize, usize> = HashMap::new();
+    let mut col_comp_to_orig: HashMap<usize, usize> = HashMap::new();
 
-        let start = coords[i];
-        let end = coords[next_ind];
+    let mut comp_col = 0;
 
-        if start[0] == end[0] {
-            // Same col.
-            for row in start[1].min(end[1]) + 1..start[1].max(end[1]) {
-                drawing[row][start[0]] = 'X';
+    col_orig_to_comp.insert(cols[0], 0);
+    col_comp_to_orig.insert(0, cols[0]);
+
+    for i in 1..cols.len() {
+        // Don't create gaps.
+        if cols[i] == cols[i-1] + 1 {
+            comp_col += 1;
+        } else {
+            comp_col += 2;
+        }
+        col_orig_to_comp.insert(cols[i], comp_col);
+        col_comp_to_orig.insert(comp_col, cols[i]);
+    }
+
+    let coords_compressed: Vec<MatrixPos> = coords.iter().map(|c| MatrixPos{
+        row: *row_orig_to_comp.get(&c.row).unwrap(),
+        col: *col_orig_to_comp.get(&c.col).unwrap(),
+    }).collect();
+
+
+    let mut drawing = vec![vec!['.'; cols.last().unwrap() + 1]; rows.last().unwrap()+ 1];
+
+    for c in coords_compressed.iter() {
+        drawing[c.row][c.col] = '#';
+    }
+
+    for i in 0..coords_compressed.len() {
+        let next_ind = if i < coords_compressed.len() - 1 { i + 1 } else { 0 };
+
+        let start = &coords_compressed[i];
+        let end = &coords_compressed[next_ind];
+
+        if start.row == end.row {
+            for col in start.col.min(end.col)+1..start.col.max(end.col) {
+                drawing[start.row][col] = 'X';
             }
         } else {
-            // Same row.
-            for col in start[0].min(end[0]) + 1..start[0].max(end[0]) {
-                drawing[start[1]][col] = 'X';
-            }
+            for row in start.row.min(end.row)+1..start.row.max(end.row) {
+                drawing[row][start.col] = 'X';
+            }  
         }
     }
 
-    // println!();
+    let mut top_corn = 0;
 
-    // for row in min_row..=max_row {
-    //     for col in min_col..=max_col {
-    //         print!("{}", drawing[row][col]);
-    //     }
-    //     println!();
-    // }
-
-    let mut pt: Option<(usize, usize)> = None;
-
-    for j in 0..drawing[min_row].len() {
-        if drawing[min_row][j] == '#' {
-            pt = Some((min_row, j));
+    for col in 0..=comp_col {
+        if drawing[0][col] != '.' {
+            top_corn = col;
             break;
         }
     }
 
-    let pt = pt.unwrap();
+    let mut stack: Vec<MatrixPos> = vec![MatrixPos{row: 1, col: top_corn+1}];
 
-    let mut stack: Vec<(usize, usize)> = vec![(pt.0 + 1, pt.1 + 1)];
-
-    while let Some(start) = stack.pop() {
-        drawing[start.0][start.1] = 'X';
+    while let Some(pos) = stack.pop() {
+        drawing[pos.row][pos.col] = 'X';
 
         // One row up.
-        if start.0 > 0 && drawing[start.0 - 1][start.1] == '.' {
-            stack.push((start.0 - 1, start.1));
+        if pos.row > 0 && drawing[pos.row - 1][pos.col] == '.' {
+            stack.push(MatrixPos { row: pos.row-1, col: pos.col });
         }
 
         // One row down.
-        if start.0 < drawing.len() - 1 && drawing[start.0 + 1][start.1] == '.' {
-            stack.push((start.0 + 1, start.1));
+        if pos.row < comp_row && drawing[pos.row+1][pos.col] == '.' {
+            stack.push(MatrixPos { row: pos.row+1, col: pos.col });
         }
 
         // One col left.
-        if start.1 > 0 && drawing[start.0][start.1 - 1] == '.' {
-            stack.push((start.0, start.1 - 1));
+        if pos.col > 0 && drawing[pos.row][pos.col - 1] == '.' {
+            stack.push(MatrixPos { row: pos.row, col: pos.col -1 });
         }
 
         // One col right.
-        if start.1 < drawing[0].len() - 1 && drawing[start.0][start.1 + 1] == '.' {
-            stack.push((start.0, start.1 + 1));
+        if pos.col < comp_col && drawing[pos.row][pos.col + 1] == '.' {
+            stack.push(MatrixPos { row: pos.row, col: pos.col +1 });
         }
     }
-
-    // println!();
-
-    // for row in min_row..=max_row {
-    //     for col in min_col..=max_col {
-    //         print!("{}", drawing[row][col]);
-    //     }
-    //     println!();
-    // }
 
     let mut max = 0;
 
     for i in 0..coords.len() {
         'xdd: for j in i + 1..coords.len() {
-            let l = coords[i][0].max(coords[j][0]) - coords[i][0].min(coords[j][0]) + 1;
-            let w = coords[i][1].max(coords[j][1]) - coords[i][1].min(coords[j][1]) + 1;
+            let height = coords[i].row.max(coords[j].row) - coords[i].row.min(coords[j].row) + 1;
+            let width = coords[i].col.max(coords[j].col) - coords[i].col.min(coords[j].col) + 1;
 
-            for row in coords[i][1].min(coords[j][1])..=coords[i][1].max(coords[j][1]) {
-                for col in coords[i][0].min(coords[j][0])..=coords[i][0].max(coords[j][0]) {
+            for row in coords_compressed[i].row.min(coords_compressed[j].row)..=coords_compressed[i].row.max(coords_compressed[j].row) {
+                for col in coords_compressed[i].col.min(coords_compressed[j].col)..=coords_compressed[i].col.max(coords_compressed[j].col) {
                     if drawing[row][col] == '.' {
                         continue 'xdd;
                     }
                 }
             }
 
-            max = max.max(l * w)
+            max = max.max(height * width)
         }
     }
 
