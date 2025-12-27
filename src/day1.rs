@@ -27,11 +27,12 @@ pub fn part1(input: &str) -> i32 {
     let mut password = 0;
     let mut position: i32 = 50;
 
-    for Turn { direction, clicks } in parse(input) {
-        position += match direction {
-            Direction::Left => 1,
-            Direction::Right => -1,
-        } * clicks;
+    for turn in parse(input) {
+        let sign = match turn.direction {
+            Direction::Left => -1,
+            Direction::Right => 1,
+        };
+        position += sign * turn.clicks;
 
         if position % 100 == 0 {
             password += 1;
@@ -45,20 +46,17 @@ pub fn part2(input: &str) -> i32 {
     let mut password = 0;
     let mut position: i32 = 50;
 
-    for line in input.lines() {
-        let direction = line.chars().next().unwrap();
-        let clicks: i32 = line[1..].parse().unwrap();
-
-        let step = match direction {
-            'R' => 1,
-            'L' => -1,
-            _ => panic!("Unexpected direction {}", direction),
+    for turn in parse(input) {
+        let step = match turn.direction {
+            Direction::Left => -1,
+            Direction::Right => 1,
         };
 
-        for _ in 0..clicks {
+        // TODO: We can surely avoid performing all these steps, but I
+        // worry that there will be a lot of cases.
+        for _ in 0..turn.clicks {
             position += step;
-            position = position % 100;
-            if position == 0 {
+            if position % 100 == 0 {
                 password += 1;
             }
         }
