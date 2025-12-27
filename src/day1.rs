@@ -53,7 +53,8 @@ pub fn part2(input: &str) -> i32 {
         };
 
         // TODO: We can surely avoid performing all these steps, but I
-        // worry that there will be a lot of cases.
+        // worry that there will be a lot of cases. It seems to be fast enough
+        // to move on.
         for _ in 0..turn.clicks {
             position += step;
             if position % 100 == 0 {
