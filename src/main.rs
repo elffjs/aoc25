@@ -1,54 +1,7 @@
 use core::panic;
 use std::{collections::HashMap, fs};
 
-fn day1_part1(input: &str) -> i32 {
-    let mut password = 0;
-    let mut position: i32 = 50;
-
-    for line in input.lines() {
-        let direction = line.chars().next().unwrap();
-        let clicks: i32 = line[1..].parse().unwrap();
-
-        match direction {
-            'R' => position += clicks,
-            'L' => position -= clicks,
-            _ => panic!("Unexpected direction {}", direction),
-        }
-
-        position = position % 100;
-        if position == 0 {
-            password += 1;
-        }
-    }
-
-    password
-}
-
-fn day1_part2(input: &str) -> i32 {
-    let mut password = 0;
-    let mut position: i32 = 50;
-
-    for line in input.lines() {
-        let direction = line.chars().next().unwrap();
-        let clicks: i32 = line[1..].parse().unwrap();
-
-        let step = match direction {
-            'R' => 1,
-            'L' => -1,
-            _ => panic!("Unexpected direction {}", direction),
-        };
-
-        for _ in 0..clicks {
-            position += step;
-            position = position % 100;
-            if position == 0 {
-                password += 1;
-            }
-        }
-    }
-
-    password
-}
+mod day1;
 
 fn day2_part1(input: &str) -> i64 {
     let mut invalid: i64 = 0;
@@ -742,19 +695,23 @@ fn day9_part1(input: &str) -> i64 {
 }
 
 #[derive(Debug)]
-struct MatrixPos{
+struct MatrixPos {
     row: usize,
-    col: usize
+    col: usize,
 }
 
 fn day9_part2(input: &str) -> i64 {
     let coords: Vec<MatrixPos> = input
         .lines()
         .map(|l| {
-            let v = l.split(",")
+            let v = l
+                .split(",")
                 .map(|n| n.parse::<usize>().unwrap())
                 .collect::<Vec<_>>();
-                MatrixPos{row: v[1], col: v[0]}
+            MatrixPos {
+                row: v[1],
+                col: v[0],
+            }
         })
         .collect();
 
@@ -772,7 +729,7 @@ fn day9_part2(input: &str) -> i64 {
 
     for i in 1..rows.len() {
         // Don't create gaps.
-        if rows[i] == rows[i-1] + 1 {
+        if rows[i] == rows[i - 1] + 1 {
             comp_row += 1;
         } else {
             comp_row += 2;
@@ -795,7 +752,7 @@ fn day9_part2(input: &str) -> i64 {
 
     for i in 1..cols.len() {
         // Don't create gaps.
-        if cols[i] == cols[i-1] + 1 {
+        if cols[i] == cols[i - 1] + 1 {
             comp_col += 1;
         } else {
             comp_col += 2;
@@ -804,32 +761,38 @@ fn day9_part2(input: &str) -> i64 {
         col_comp_to_orig.insert(comp_col, cols[i]);
     }
 
-    let coords_compressed: Vec<MatrixPos> = coords.iter().map(|c| MatrixPos{
-        row: *row_orig_to_comp.get(&c.row).unwrap(),
-        col: *col_orig_to_comp.get(&c.col).unwrap(),
-    }).collect();
+    let coords_compressed: Vec<MatrixPos> = coords
+        .iter()
+        .map(|c| MatrixPos {
+            row: *row_orig_to_comp.get(&c.row).unwrap(),
+            col: *col_orig_to_comp.get(&c.col).unwrap(),
+        })
+        .collect();
 
-
-    let mut drawing = vec![vec!['.'; cols.last().unwrap() + 1]; rows.last().unwrap()+ 1];
+    let mut drawing = vec![vec!['.'; cols.last().unwrap() + 1]; rows.last().unwrap() + 1];
 
     for c in coords_compressed.iter() {
         drawing[c.row][c.col] = '#';
     }
 
     for i in 0..coords_compressed.len() {
-        let next_ind = if i < coords_compressed.len() - 1 { i + 1 } else { 0 };
+        let next_ind = if i < coords_compressed.len() - 1 {
+            i + 1
+        } else {
+            0
+        };
 
         let start = &coords_compressed[i];
         let end = &coords_compressed[next_ind];
 
         if start.row == end.row {
-            for col in start.col.min(end.col)+1..start.col.max(end.col) {
+            for col in start.col.min(end.col) + 1..start.col.max(end.col) {
                 drawing[start.row][col] = 'X';
             }
         } else {
-            for row in start.row.min(end.row)+1..start.row.max(end.row) {
+            for row in start.row.min(end.row) + 1..start.row.max(end.row) {
                 drawing[row][start.col] = 'X';
-            }  
+            }
         }
     }
 
@@ -842,29 +805,44 @@ fn day9_part2(input: &str) -> i64 {
         }
     }
 
-    let mut stack: Vec<MatrixPos> = vec![MatrixPos{row: 1, col: top_corn+1}];
+    let mut stack: Vec<MatrixPos> = vec![MatrixPos {
+        row: 1,
+        col: top_corn + 1,
+    }];
 
     while let Some(pos) = stack.pop() {
         drawing[pos.row][pos.col] = 'X';
 
         // One row up.
         if pos.row > 0 && drawing[pos.row - 1][pos.col] == '.' {
-            stack.push(MatrixPos { row: pos.row-1, col: pos.col });
+            stack.push(MatrixPos {
+                row: pos.row - 1,
+                col: pos.col,
+            });
         }
 
         // One row down.
-        if pos.row < comp_row && drawing[pos.row+1][pos.col] == '.' {
-            stack.push(MatrixPos { row: pos.row+1, col: pos.col });
+        if pos.row < comp_row && drawing[pos.row + 1][pos.col] == '.' {
+            stack.push(MatrixPos {
+                row: pos.row + 1,
+                col: pos.col,
+            });
         }
 
         // One col left.
         if pos.col > 0 && drawing[pos.row][pos.col - 1] == '.' {
-            stack.push(MatrixPos { row: pos.row, col: pos.col -1 });
+            stack.push(MatrixPos {
+                row: pos.row,
+                col: pos.col - 1,
+            });
         }
 
         // One col right.
         if pos.col < comp_col && drawing[pos.row][pos.col + 1] == '.' {
-            stack.push(MatrixPos { row: pos.row, col: pos.col +1 });
+            stack.push(MatrixPos {
+                row: pos.row,
+                col: pos.col + 1,
+            });
         }
     }
 
@@ -875,8 +853,12 @@ fn day9_part2(input: &str) -> i64 {
             let height = coords[i].row.max(coords[j].row) - coords[i].row.min(coords[j].row) + 1;
             let width = coords[i].col.max(coords[j].col) - coords[i].col.min(coords[j].col) + 1;
 
-            for row in coords_compressed[i].row.min(coords_compressed[j].row)..=coords_compressed[i].row.max(coords_compressed[j].row) {
-                for col in coords_compressed[i].col.min(coords_compressed[j].col)..=coords_compressed[i].col.max(coords_compressed[j].col) {
+            for row in coords_compressed[i].row.min(coords_compressed[j].row)
+                ..=coords_compressed[i].row.max(coords_compressed[j].row)
+            {
+                for col in coords_compressed[i].col.min(coords_compressed[j].col)
+                    ..=coords_compressed[i].col.max(coords_compressed[j].col)
+                {
                     if drawing[row][col] == '.' {
                         continue 'xdd;
                     }
@@ -891,40 +873,39 @@ fn day9_part2(input: &str) -> i64 {
 }
 
 fn main() {
-    // let day1_input = fs::read_to_string("input1").unwrap();
-    // println!("D1P1: {}", day1_part1(&day1_input));
-    // println!("D1P2: {}", day1_part2(&day1_input));
+    let day1_input = fs::read_to_string("input1").unwrap();
+    println!("D1P1: {}", day1::part1(&day1_input));
+    println!("D1P2: {}", day1::part2(&day1_input));
 
-    // let day2_input = fs::read_to_string("input2").unwrap();
-    // println!("D2P1: {}", day2_part1(&day2_input));
-    // println!("D2P2: {}", day2_part2(&day2_input));
+    let day2_input = fs::read_to_string("input2").unwrap();
+    println!("D2P1: {}", day2_part1(&day2_input));
+    println!("D2P2: {}", day2_part2(&day2_input));
 
-    // let day3_input = fs::read_to_string("input3").unwrap();
-    // println!("D3P1: {}", day3_part1(&day3_input));
-    // println!("D3P2: {}", day3_part2(&day3_input));
+    let day3_input = fs::read_to_string("input3").unwrap();
+    println!("D3P1: {}", day3_part1(&day3_input));
+    println!("D3P2: {}", day3_part2(&day3_input));
 
-    // let day4_input = fs::read_to_string("input4").unwrap();
-    // println!("D4P1: {}", day4_part1(&day4_input));
-    // println!("D4P2: {}", day4_part2(&day4_input));
+    let day4_input = fs::read_to_string("input4").unwrap();
+    println!("D4P1: {}", day4_part1(&day4_input));
+    println!("D4P2: {}", day4_part2(&day4_input));
 
-    // let day5_input = fs::read_to_string("input5").unwrap();
-    // println!("D5P1: {}", day5_part1(&day5_input));
-    // println!("D5P2: {}", day5_part2(&day5_input));
+    let day5_input = fs::read_to_string("input5").unwrap();
+    println!("D5P1: {}", day5_part1(&day5_input));
+    println!("D5P2: {}", day5_part2(&day5_input));
 
-    // let day6_input = fs::read_to_string("input6").unwrap();
-    // println!("D6P1: {}", day6_part1(&day6_input));
-    // println!("D6P2: {}", day6_part2(&day6_input));
+    let day6_input = fs::read_to_string("input6").unwrap();
+    println!("D6P1: {}", day6_part1(&day6_input));
+    println!("D6P2: {}", day6_part2(&day6_input));
 
-    // let day7_input = fs::read_to_string("input7").unwrap();
-    // println!("D7P1: {}", day7_part1(&day7_input));
-    // println!("D7P2: {}", day7_part2(&day7_input));
+    let day7_input = fs::read_to_string("input7").unwrap();
+    println!("D7P1: {}", day7_part1(&day7_input));
+    println!("D7P2: {}", day7_part2(&day7_input));
 
-    // let day8_input = fs::read_to_string("input8").unwrap();
-    // // println!("D8P1: {}", day8_part1(&day8_input, 1000));
-    // println!("D8P2: {}", day8_part2(&day8_input));
+    let day8_input = fs::read_to_string("input8").unwrap();
+    println!("D8P1: {}", day8_part1(&day8_input, 1000));
+    println!("D8P2: {}", day8_part2(&day8_input));
 
     let day9_input = fs::read_to_string("input9").unwrap();
-    // println!("D8P1: {}", day8_part1(&day8_input, 1000));
     println!("D9P1: {}", day9_part1(&day9_input));
     println!("D9P2: {}", day9_part2(&day9_input));
 }
@@ -932,22 +913,6 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_day1() {
-        let input = "L68
-L30
-R48
-L5
-R60
-L55
-L1
-L99
-R14
-L82";
-        assert_eq!(3, day1_part1(input));
-        assert_eq!(6, day1_part2(input));
-    }
 
     #[test]
     fn test_day2() {
