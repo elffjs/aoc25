@@ -2,6 +2,7 @@ use core::panic;
 use std::{collections::HashMap, fs};
 
 mod day1;
+mod day10;
 
 fn day2_part1(input: &str) -> i64 {
     let mut invalid: i64 = 0;
@@ -873,41 +874,45 @@ fn day9_part2(input: &str) -> i64 {
 }
 
 fn main() {
-    let day1_input = fs::read_to_string("input1").unwrap();
-    println!("D1P1: {}", day1::part1(&day1_input));
-    println!("D1P2: {}", day1::part2(&day1_input));
+    // let day1_input = fs::read_to_string("input1").unwrap();
+    // println!("D1P1: {}", day1::part1(&day1_input));
+    // println!("D1P2: {}", day1::part2(&day1_input));
 
-    let day2_input = fs::read_to_string("input2").unwrap();
-    println!("D2P1: {}", day2_part1(&day2_input));
-    println!("D2P2: {}", day2_part2(&day2_input));
+    // let day2_input = fs::read_to_string("input2").unwrap();
+    // println!("D2P1: {}", day2_part1(&day2_input));
+    // println!("D2P2: {}", day2_part2(&day2_input));
 
-    let day3_input = fs::read_to_string("input3").unwrap();
-    println!("D3P1: {}", day3_part1(&day3_input));
-    println!("D3P2: {}", day3_part2(&day3_input));
+    // let day3_input = fs::read_to_string("input3").unwrap();
+    // println!("D3P1: {}", day3_part1(&day3_input));
+    // println!("D3P2: {}", day3_part2(&day3_input));
 
-    let day4_input = fs::read_to_string("input4").unwrap();
-    println!("D4P1: {}", day4_part1(&day4_input));
-    println!("D4P2: {}", day4_part2(&day4_input));
+    // let day4_input = fs::read_to_string("input4").unwrap();
+    // println!("D4P1: {}", day4_part1(&day4_input));
+    // println!("D4P2: {}", day4_part2(&day4_input));
 
-    let day5_input = fs::read_to_string("input5").unwrap();
-    println!("D5P1: {}", day5_part1(&day5_input));
-    println!("D5P2: {}", day5_part2(&day5_input));
+    // let day5_input = fs::read_to_string("input5").unwrap();
+    // println!("D5P1: {}", day5_part1(&day5_input));
+    // println!("D5P2: {}", day5_part2(&day5_input));
 
-    let day6_input = fs::read_to_string("input6").unwrap();
-    println!("D6P1: {}", day6_part1(&day6_input));
-    println!("D6P2: {}", day6_part2(&day6_input));
+    // let day6_input = fs::read_to_string("input6").unwrap();
+    // println!("D6P1: {}", day6_part1(&day6_input));
+    // println!("D6P2: {}", day6_part2(&day6_input));
 
-    let day7_input = fs::read_to_string("input7").unwrap();
-    println!("D7P1: {}", day7_part1(&day7_input));
-    println!("D7P2: {}", day7_part2(&day7_input));
+    // let day7_input = fs::read_to_string("input7").unwrap();
+    // println!("D7P1: {}", day7_part1(&day7_input));
+    // println!("D7P2: {}", day7_part2(&day7_input));
 
-    let day8_input = fs::read_to_string("input8").unwrap();
-    println!("D8P1: {}", day8_part1(&day8_input, 1000));
-    println!("D8P2: {}", day8_part2(&day8_input));
+    // let day8_input = fs::read_to_string("input8").unwrap();
+    // println!("D8P1: {}", day8_part1(&day8_input, 1000));
+    // println!("D8P2: {}", day8_part2(&day8_input));
 
-    let day9_input = fs::read_to_string("input9").unwrap();
-    println!("D9P1: {}", day9_part1(&day9_input));
-    println!("D9P2: {}", day9_part2(&day9_input));
+    // let day9_input = fs::read_to_string("input9").unwrap();
+    // println!("D9P1: {}", day9_part1(&day9_input));
+    // println!("D9P2: {}", day9_part2(&day9_input));
+
+    let day10_input = fs::read_to_string("input10").unwrap();
+
+    println!("{:?}", day10::part1(&day10_input));
 }
 
 #[cfg(test)]
