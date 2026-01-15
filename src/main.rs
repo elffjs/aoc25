@@ -3,6 +3,7 @@ use std::{collections::HashMap, fs};
 
 mod day1;
 mod day10;
+mod day11;
 
 fn day2_part1(input: &str) -> i64 {
     let mut invalid: i64 = 0;
@@ -910,9 +911,16 @@ fn main() {
     // println!("D9P1: {}", day9_part1(&day9_input));
     // println!("D9P2: {}", day9_part2(&day9_input));
 
-    let day10_input = fs::read_to_string("input10").unwrap();
+    // let day10_input = fs::read_to_string("input10").unwrap();
 
-    println!("{:?}", day10::part1(&day10_input));
+    // // println!("D10P1 {}", day10::part1(&day10_input));
+    // println!("D10P2 {}", day10::part2(&day10_input));
+
+    let day11_input = fs::read_to_string("input11").unwrap();
+
+    // println!("D10P1 {}", day10::part1(&day10_input));
+    println!("D11P1 {}", day11::part1(&day11_input));
+    println!("D11P2 {}", day11::part2(&day11_input));
 }
 
 #[cfg(test)]
