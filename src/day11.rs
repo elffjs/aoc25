@@ -16,14 +16,19 @@ pub fn part1(input: &str) -> i64 {
     }
 
     count_paths(&graph, "you".to_string(), "out".to_string()) as i64
-} 
+}
 
-fn inner(start: String, end: String, graph: &HashMap<String, Vec<String>>, cache: &mut HashMap<String, usize>) -> usize {
+fn inner(
+    start: String,
+    end: String,
+    graph: &HashMap<String, Vec<String>>,
+    cache: &mut HashMap<String, usize>,
+) -> usize {
     if let Some(exist) = cache.get(&start) {
-        *exist 
-    } else if start == end{
+        *exist
+    } else if start == end {
         1
-    } else if let Some(desc) = graph.get(&start){
+    } else if let Some(desc) = graph.get(&start) {
         let mut tot = 0;
         for out in desc {
             tot += inner(out.clone(), end.clone(), graph, cache);
