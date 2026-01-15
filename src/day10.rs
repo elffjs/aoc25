@@ -49,6 +49,11 @@ impl Matrix {
         row * self.cols + col
     }
 
+    fn row(self: &Self, row: usize) -> &[i32] {
+        let row_start = self.entry_idx(row, 0);
+        &self.entries[row_start..row_start+self.cols]
+    }
+
     fn set(self: &mut Self, row: usize, col: usize, value: i32) {
         if row >= self.rows || col >= self.cols {
             panic!("out of bounds");
@@ -104,22 +109,12 @@ impl Matrix {
             panic!("out of bounds");
         }
 
-        // Very wasteful. Should do Euclidean algorithm.
-        let max_abs = (0..self.cols)
-            .map(|col| self.get(row, col).abs())
-            .max()
-            .unwrap();
+        let divisor = gcd(self.row(row));
 
-        'div_check: for d in (2..=max_abs).rev() {
+        if divisor.abs() >= 2 {
             for col in 0..self.cols {
-                if self.entries[row * self.cols + col] % d != 0 {
-                    continue 'div_check;
-                }
+                self.set(row, col, self.get(row, col) / divisor);
             }
-            for col in 0..self.cols {
-                self.entries[row * self.cols + col] /= d;
-            }
-            break;
         }
 
         if let Some(first_nontriv_col) = (0..self.cols).find(|&col| self.get(row, col) != 0) {
@@ -175,6 +170,24 @@ fn subsets<T: Copy>(set: Vec<T>, size: usize) -> Vec<Vec<T>> {
 
             out
         }
+    }
+}
+
+// Euclidean algorithm.
+fn gcd_pair(a: i32, b: i32) -> i32 {
+    if a == 0 {
+        b
+    } else {
+        gcd_pair(b % a, a)
+    }
+}
+
+fn gcd(nums: &[i32]) -> i32 {
+    // gcd(a, b, c) = gcd(a, gcd(b, c)) and so on.
+    if let Some(a) = nums.first() {
+        gcd_pair(*a, gcd(&nums[1..]))
+    } else {
+        0
     }
 }
 
@@ -612,12 +625,13 @@ mod tests {
 
         assert_eq!(frees, vec![2]);
     }
-}
 
-/*
-  1  0  1  1  0  7
-  0  0  0  1  1  5
-  1  1  0  1  1 12
-  1  1  0  0  1  7
-  1  0  1  0  1  2
-*/
+    #[test]
+    fn test_gcd() {
+        assert_eq!(1, gcd(&vec![2, 3, 6]));
+        assert_eq!(2, gcd(&vec![2, 4, 6]));
+        assert_eq!(0, gcd(&vec![]));
+        assert_eq!(7, gcd(&vec![7, 0]));
+        assert_eq!(7, gcd(&vec![-7, 0]).abs());
+    }
+}

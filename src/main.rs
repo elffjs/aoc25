@@ -4,6 +4,7 @@ use std::{collections::HashMap, fs};
 mod day1;
 mod day10;
 mod day11;
+mod day12;
 
 fn day2_part1(input: &str) -> i64 {
     let mut invalid: i64 = 0;
